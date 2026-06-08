@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SciFi or Scripture</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #111;
+    color: white;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+    padding: 40px 20px;
+}
+
+h1 {
+    font-size: 3rem;
+    margin-bottom: 20px;
+}
+
+.quote {
+    font-size: 1.6rem;
+    line-height: 1.6;
+    margin: 40px 0;
+    min-height: 120px;
+}
+
+.result {
+    font-size: 2rem;
+    font-weight: bold;
+    min-height: 50px;
+    margin-bottom: 20px;
+}
+
+.correct {
+    color: #44d662;
+}
+
+.incorrect {
+    color: #ff4d4d;
+}
+
+.source {
+    font-size: 1.2rem;
+    font-style: italic;
+    margin-bottom: 30px;
+    min-height: 40px;
+}
+
+button {
+    background-color: #1f6feb;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 15px 30px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    margin: 10px;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+.hidden {
+    display: none;
+}
+
+.score {
+    font-size: 2rem;
+    margin: 30px 0;
+}
+
+.question-counter {
+    font-size: 1.2rem;
+    color: #cccccc;
+}
+
+.error {
+    color: #ff4d4d;
+    font-size: 1.2rem;
+    margin-top: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- HOME PAGE -->
+    <div id="homePage">
+
+        <h1>SciFi or Scripture</h1>
+
+        <p style="font-size:1.3rem;">
+            Determine if the quote is from a piece of Science Fiction
+            or from the Holy Bible.
+        </p>
+
+        <button id="startBtn">
+            BEGIN 10 QUESTION QUIZ
+        </button>
+
+        <div id="homeError" class="error"></div>
+
+    </div>
+
+    <!-- QUIZ PAGE -->
+    <div id="quizPage" class="hidden">
+
+        <div id="questionCounter" class="question-counter"></div>
+
+        <div id="quoteText" class="quote"></div>
+
+        <div id="answerResult" class="result"></div>
+
+        <div id="sourceText" class="source"></div>
+
+        <div id="answerButtons">
+
+            <button onclick="answerQuestion('SciFi')">
+                SciFi
+            </button>
+
+            <button onclick="answerQuestion('Scripture')">
+                Scripture
+            </button>
+
+        </div>
+
+        <button id="nextBtn"
+                class="hidden"
+                onclick="nextQuestion()">
+            Next Question
+        </button>
+
+    </div>
+
+    <!-- RESULTS PAGE -->
+    <div id="resultsPage" class="hidden">
+
+        <h1>Quiz Results</h1>
+
+        <div id="scoreText" class="score"></div>
+
+        <button onclick="goHome()">
+            Return Home
+        </button>
+
+    </div>
+
+</div>
+
+<script>
+
+/* ==================================================
+   QUOTE DATABASE
+   ================================================== */
+
+const allQuotes = [
+
+    {
+        quote: "Great leaders inspire greatness in others.",
+        source: "The Clone Wars - Season 1, Episode 01 - Ambush",
+        category: "SciFi"
+    },
+    {
+        quote: "Belief is not a matter of choice, but of conviction.",
+        source: "The Clone Wars - Season 1, Episode 02 - Rising Malevolence",
+        category: "SciFi"
+    },
+    {
+        quote: "Easy is the path to wisdom for those not blinded by ego.",
+        source: "The Clone Wars - Season 1, Episode 03 - Shadow of Malevolence",
+        category: "SciFi"
+    },
+    {
+        quote: "A plan is only as good as those who see it through.",
+        source: "The Clone Wars - Season 1, Episode 04 - Destroy Malevolence",
+        category: "SciFi"
+    },
+    {
+        quote: "The best confidence builder is experience.",
+        source: "The Clone Wars - Season 1, Episode 05 - Rookies",
+        category: "SciFi"
+    },
+    {
+        quote: "Trust in your friends, and they’ll have reason to trust in you.",
+        source: "The Clone Wars - Season 1, Episode 06 - Downfall of a Droid",
+        category: "SciFi"
+    },
+    {
+        quote: "You hold onto friends by keeping your heart a little softer than your head.",
+        source: "The Clone Wars - Season 1, Episode 07 - Duel of the Droids",
+        category: "SciFi"
+    },
+    {
+        quote: "Ignore your instincts at your peril.",
+        source: "The Clone Wars - Season 1, Episode 09 - Cloak of Darkness",
+        category: "SciFi"
+    },
+    {
+        quote: "Most powerful is he who controls his own power.",
+        source: "The Clone Wars - Season 1, Episode 10 - Lair of Grievous",
+        category: "SciFi"
+    },
+    {
+        quote: "The winding path to peace is always a worthy one, regardless of how many turns it takes.",
+        source: "The Clone Wars - Season 1, Episode 11 - Dooku Captured",
+        category: "SciFi"
+    },
+    {
+        quote: "Fail with honor rather than succeed by fraud.",
+        source: "The Clone Wars - Season 1, Episode 12 - The Gungan General",
+        category: "SciFi"
+    },
+    {
+        quote: "Greed and fear of loss are the roots that lead to the tree of evil.",
+        source: "The Clone Wars - Season 1, Episode 13 - Jedi Crash",
+        category: "SciFi"
+    },
+    {
+        quote: "When surrounded by war, one must eventually choose a side.",
+        source: "The Clone Wars - Season 1, Episode 14 - Defenders of Peace",
+        category: "SciFi"
+    },
+    {
+        quote: "Arrogance diminishes wisdom.",
+        source: "The Clone Wars - Season 1, Episode 15 - Trespass",
+        category: "SciFi"
+    },
+    {
+        quote: "Truth enlightens the mind, but won’t always bring happiness to your heart.",
+        source: "The Clone Wars - Season 1, Episode 16 - The Hidden Enemy",
+        category: "SciFi"
+    },
+    {
+        quote: "Fear is a disease; hope is its only cure.",
+        source: "The Clone Wars - Season 1, Episode 17 - Blue Shadow Virus",
+        category: "SciFi"
+    },
+    {
+        quote: "It is a rough road that leads to the heights of greatness.",
+        source: "The Clone Wars - Season 1, Episode 19 - Storm over Ryloth",
+        category: "SciFi"
+    },
+    {
+        quote: "The costs of war can never be truly accounted for.",
+        source: "The Clone Wars - Season 1, Episode 20 - Innocents of Ryloth",
+        category: "SciFi"
+    },
+    {
+        quote: "Compromise is a virtue to be cultivated, not a weakness to be despised.",
+        source: "The Clone Wars - Season 1, Episode 21 - Liberty on Ryloth",
+        category: "SciFi"
+    },
+    {
+        quote: "A secret shared is a trust formed.",
+        source: "The Clone Wars - Season 1, Episode 22 - Hostage Crisis",
+        category: "SciFi"
+    },
+    {
+        quote: "A lesson learned is a lesson earned.",
+        source: "The Clone Wars - Season 2, Episode 01 - Holocron Heist",
+        category: "SciFi"
+    },
+    {
+        quote: "Overconfidence is the most dangerous form of carelessness.",
+        source: "The Clone Wars - Season 2, Episode 02 - Cargo of Doom",
+        category: "SciFi"
+    },
+    {
+        quote: "The first step to correcting a mistake is patience.",
+        source: "The Clone Wars - Season 2, Episode 03 - Children of the Force",
+        category: "SciFi"
+    },
+    {
+        quote: "A true heart should never be doubted.",
+        source: "The Clone Wars - Season 2, Episode 04 - Senate Spy",
+        category: "SciFi"
+    },
+    {
+        quote: "No gift is more precious than trust.",
+        source: "The Clone Wars - Season 2, Episode 06 - Weapons Factory",
+        category: "SciFi"
+    },
+    {
+        quote: "Sometimes, accepting help is harder than offering it.",
+        source: "The Clone Wars - Season 2, Episode 07 - Legacy of Terror",
+        category: "SciFi"
+    },
+    {
+        quote: "Attachment is not compassion.",
+        source: "The Clone Wars - Season 2, Episode 08 - Brain Invaders",
+        category: "SciFi"
+    },
+    {
+        quote: "For everything you gain, you lose something else.",
+        source: "The Clone Wars - Season 2, Episode 09 - Grievous Intrigue",
+        category: "SciFi"
+    },
+    {
+        quote: "It is the quest for honor that makes one honorable.",
+        source: "The Clone Wars - Season 2, Episode 10 - The Deserter",
+        category: "SciFi"
+    },
+    {
+        quote: "Easy isn’t always simple.",
+        source: "The Clone Wars - Season 2, Episode 11 - Lightsaber Lost",
+        category: "SciFi"
+    },
+    {
+        quote: "If you ignore the past, you jeopardize the future.",
+        source: "The Clone Wars - Season 2, Episode 12 - The Mandalore Plot",
+        category: "SciFi"
+    },
+    {
+        quote: "Fear not for the future, weep not for the past.",
+        source: "The Clone Wars - Season 2, Episode 13 - Voyage of Temptation",
+        category: "SciFi"
+    },
+    {
+        quote: "Searching for the truth is easy. Accepting the truth is hard.",
+        source: "The Clone Wars - Season 2, Episode 15 - Senate Murders",
+        category: "SciFi"
+    },
+    {
+        quote: "A wise leader knows when to follow.",
+        source: "The Clone Wars - Season 2, Episode 16 - Cat and Mouse",
+        category: "SciFi"
+    },
+    {
+        quote: "Courage makes heroes, but trust builds friendships.",
+        source: "The Clone Wars - Season 2, Episode 17 - Bounty Hunters",
+        category: "SciFi"
+    },
+    {
+        quote: "Choose what is right, not what is easy.",
+        source: "The Clone Wars - Season 2, Episode 18 - The Zillo Beast",
+        category: "SciFi"
+    },
+    {
+        quote: "The most dangerous beast is the beast within.",
+        source: "The Clone Wars - Season 2, Episode 19 - The Zillo Beast Strikes Back",
+        category: "SciFi"
+    },
+    {
+        quote: "Who my father was matters less than my memory of him.",
+        source: "The Clone Wars - Season 2, Episode 20 - Death Trap",
+        category: "SciFi"
+    },
+    {
+        quote: "Adversity is a friendship’s truest test.",
+        source: "The Clone Wars - Season 2, Episode 21 - R2 Come Home",
+        category: "SciFi"
+    },
+    {
+        quote: "Revenge is a confession of pain.",
+        source: "The Clone Wars - Season 2, Episode 22 - Lethal Trackdown",
+        category: "SciFi"
+    },
+    {
+        quote: "Where there’s a will, there’s a way.",
+        source: "The Clone Wars - Season 3, Episode 03 - Supply Lines",
+        category: "SciFi"
+    },
+    {
+        quote: "A child stolen is a hope lost.",
+        source: "The Clone Wars - Season 3, Episode 04 - Sphere of Influence",
+        category: "SciFi"
+    },
+    {
+        quote: "The challenge of hope is to overcome corruption.",
+        source: "The Clone Wars - Season 3, Episode 05 - Corruption",
+        category: "SciFi"
+    },
+    {
+        quote: "Those who enforce the law must obey the law.",
+        source: "The Clone Wars - Season 3, Episode 06 - The Academy",
+        category: "SciFi"
+    },
+    {
+        quote: "The future has many paths – choose wisely.",
+        source: "The Clone Wars - Season 3, Episode 07 - Assassin",
+        category: "SciFi"
+    },
+    {
+        quote: "A failure in planning is a plan for failure.",
+        source: "The Clone Wars - Season 3, Episode 08 - Evil Plans",
+        category: "SciFi"
+    },
+    {
+        quote: "Fear is a great motivator.",
+        source: "The Clone Wars - Season 3, Episode 10 - Heroes on Both Sides",
+        category: "SciFi"
+    },
+    {
+        quote: "Truth can strike down the spectre of fear.",
+        source: "The Clone Wars - Season 3, Episode 11 - Pursuit of Peace",
+        category: "SciFi"
+    },
+    {
+        quote: "The swiftest path to destruction is through vengeance.",
+        source: "The Clone Wars - Season 3, Episode 12 - Nightsisters",
+        category: "SciFi"
+    },
+    {
+        quote: "The path to evil may bring great power, but not loyalty.",
+        source: "The Clone Wars - Season 3, Episode 14 - Witches of the Mist",
+        category: "SciFi"
+    },
+    {
+        quote: "Balance is found in the one who faces his guilt.",
+        source: "The Clone Wars - Season 3, Episode 15 - Overlords",
+        category: "SciFi"
+    },
+    {
+        quote: "He who surrenders hope, surrenders life.",
+        source: "The Clone Wars - Season 3, Episode 16 - Altar of Mortis",
+        category: "SciFi"
+    },
+    {
+        quote: "He who seeks to control fate shall never find peace.",
+        source: "The Clone Wars - Season 3, Episode 17 - Ghosts of Mortis",
+        category: "SciFi"
+    },
+    {
+        quote: "Without honor, victory is hollow.",
+        source: "The Clone Wars - Season 3, Episode 20 - Citadel Rescue",
+        category: "SciFi"
+    },
+    {
+        quote: "Without humility, courage is a dangerous game.",
+        source: "The Clone Wars - Season 3, Episode 21 - Padawan Lost",
+        category: "SciFi"
+    },
+    {
+        quote: "A great student is what the teacher hopes to be.",
+        source: "The Clone Wars - Season 3, Episode 22 - Wookiee Hunt",
+        category: "SciFi"
+    },
+    {
+        quote: "Only through fire is a strong sword forged.",
+        source: "The Clone Wars - Season 4, Episode 02 - Gungan Attack",
+        category: "SciFi"
+    },
+    {
+        quote: "Crowns are inherited, kingdoms are earned.",
+        source: "The Clone Wars - Season 4, Episode 03 - Prisoners",
+        category: "SciFi"
+    },
+    {
+        quote: "Who a person truly is cannot be seen with the eye.",
+        source: "The Clone Wars - Season 4, Episode 04 - Shadow Warrior",
+        category: "SciFi"
+    },
+    {
+        quote: "Understanding is honoring the truth beneath the surface.",
+        source: "The Clone Wars - Season 4, Episode 05 - Mercy Mission",
+        category: "SciFi"
+    },
+    {
+        quote: "Who’s the more foolish, the fool or the fool who follows him?",
+        source: "The Clone Wars - Season 4, Episode 06 - Nomad Droids",
+        category: "SciFi"
+    },
+    {
+        quote: "The first step towards loyalty is trust.",
+        source: "The Clone Wars - Season 4, Episode 07 - Darkness on Umbara",
+        category: "SciFi"
+    },
+    {
+        quote: "The path of ignorance is guided by fear.",
+        source: "The Clone Wars - Season 4, Episode 08 - The General",
+        category: "SciFi"
+    },
+    {
+        quote: "The wise man leads, the strong man follows.",
+        source: "The Clone Wars - Season 4, Episode 09 - Plan of Dissent",
+        category: "SciFi"
+    },
+    {
+        quote: "Our actions define our legacy.",
+        source: "The Clone Wars - Season 4, Episode 10 - Carnage of Krell",
+        category: "SciFi"
+    },
+    {
+        quote: "Where we are going always reflects where we came from.",
+        source: "The Clone Wars - Season 4, Episode 11 - Kidnapped",
+        category: "SciFi"
+    },
+    {
+        quote: "Those who enslave others, inevitably become slaves themselves.",
+        source: "The Clone Wars - Season 4, Episode 12 - Slaves of the Republic",
+        category: "SciFi"
+    },
+    {
+        quote: "Great hope can come from small sacrifices.",
+        source: "The Clone Wars - Season 4, Episode 13 - Escape from Kadavo",
+        category: "SciFi"
+    },
+    {
+        quote: "Friendship shows us who we really are.",
+        source: "The Clone Wars - Season 4, Episode 14 - A Friend in Need",
+        category: "SciFi"
+    },
+    {
+        quote: "Keep your friends close, but keep your enemies closer.",
+        source: "The Clone Wars - Season 4, Episode 16 - Friends and Enemies",
+        category: "SciFi"
+    },
+    {
+        quote: "The strong survive, the noble overcome.",
+        source: "The Clone Wars - Season 4, Episode 17 - The Box",
+        category: "SciFi"
+    },
+    {
+        quote: "Trust is the greatest of gifts, but it must be earned.",
+        source: "The Clone Wars - Season 4, Episode 18 - Crisis on Naboo",
+        category: "SciFi"
+    },
+    {
+        quote: "One must let go of the past to hold on to the future.",
+        source: "The Clone Wars - Season 4, Episode 19 - Massacre",
+        category: "SciFi"
+    },
+    {
+        quote: "Who we are never changes, who we think we are does.",
+        source: "The Clone Wars - Season 4, Episode 20 - Bounty",
+        category: "SciFi"
+    },
+    {
+        quote: "A fallen enemy may rise again, but the reconciled one is truly vanquished.",
+        source: "The Clone Wars - Season 4, Episode 21 - Brothers",
+        category: "SciFi"
+    },
+    {
+        quote: "The enemy of my enemy is my friend.",
+        source: "The Clone Wars - Season 4, Episode 22 - Revenge",
+        category: "SciFi"
+    },
+    {
+        quote: "Strength of character can defeat strength in numbers.",
+        source: "The Clone Wars - Season 5, Episode 01 - Revival",
+        category: "SciFi"
+    },
+    {
+        quote: "To seek something is to believe in its possibility.",
+        source: "The Clone Wars - Season 5, Episode 03 - Front Runners",
+        category: "SciFi"
+    },
+    {
+        quote: "Struggles often begin and end with the truth.",
+        source: "The Clone Wars - Season 5, Episode 04 - The Soft War",
+        category: "SciFi"
+    },
+    {
+        quote: "Disobedience is a demand for change.",
+        source: "The Clone Wars - Season 5, Episode 05 - Tipping Points",
+        category: "SciFi"
+    },
+    {
+        quote: "He who faces himself, finds himself.",
+        source: "The Clone Wars - Season 5, Episode 06 - The Gathering",
+        category: "SciFi"
+    },
+    {
+        quote: "When we rescue others, we rescue ourselves.",
+        source: "The Clone Wars - Season 5, Episode 08 - Bound for Rescue",
+        category: "SciFi"
+    },
+    {
+        quote: "Humility is the only defense against humiliation.",
+        source: "The Clone Wars - Season 5, Episode 10 - Secret Weapons",
+        category: "SciFi"
+    },
+    {
+        quote: "You must trust in others or success is impossible.",
+        source: "The Clone Wars - Season 5, Episode 13 - Point of No Return",
+        category: "SciFi"
+    },
+    {
+        quote: "One vision can have many interpretations.",
+        source: "The Clone Wars - Season 5, Episode 14 - Eminence",
+        category: "SciFi"
+    },
+    {
+        quote: "Alliances can stall true intentions.",
+        source: "The Clone Wars - Season 5, Episode 15 - Shades of Reason",
+        category: "SciFi"
+    },
+    {
+        quote: "Morality separates heroes from villains.",
+        source: "The Clone Wars - Season 5, Episode 16 - The Lawless",
+        category: "SciFi"
+    },
+    {
+        quote: "Sometimes even the smallest doubt can shake the greatest belief.",
+        source: "The Clone Wars - Season 5, Episode 17 - Sabotage",
+        category: "SciFi"
+    },
+    {
+        quote: "Courage begins by trusting oneself.",
+        source: "The Clone Wars - Season 5, Episode 18 - The Jedi Who Knew Too Much",
+        category: "SciFi"
+    },
+    {
+        quote: "Never become desperate enough to trust the untrustworthy.",
+        source: "The Clone Wars - Season 5, Episode 19 - To Catch a Jedi",
+        category: "SciFi"
+    },
+    {
+        quote: "Never give up hope, no matter how dark things seem.",
+        source: "The Clone Wars - Season 5, Episode 20 - The Wrong Jedi",
+        category: "SciFi"
+    },
+    {
+        quote: "The truth about yourself is always the hardest to accept.",
+        source: "The Clone Wars - Season 6, Episode 01 - The Unknown",
+        category: "SciFi"
+    },
+    {
+        quote: "The wise benefit from a second opinion.",
+        source: "The Clone Wars - Season 6, Episode 02 - Conspiracy",
+        category: "SciFi"
+    },
+    {
+        quote: "When in doubt, go to the source.",
+        source: "The Clone Wars - Season 6, Episode 03 - Fugitive",
+        category: "SciFi"
+    },
+    {
+        quote: "The popular belief isn’t always the correct one.",
+        source: "The Clone Wars - Season 6, Episode 04 - Orders",
+        category: "SciFi"
+    },
+    {
+        quote: "To love, is to trust. To trust is to believe.",
+        source: "The Clone Wars - Season 6, Episode 05 - An Old Friend",
+        category: "SciFi"
+    },
+    {
+        quote: "Jealousy is the path to chaos.",
+        source: "The Clone Wars - Season 6, Episode 06 - The Rise of Clovis",
+        category: "SciFi"
+    },
+    {
+        quote: "Deceit is the weapon of greed.",
+        source: "The Clone Wars - Season 6, Episode 07 - Crisis at the Heart",
+        category: "SciFi"
+    },
+    {
+        quote: "Without darkness there cannot be light.",
+        source: "The Clone Wars - Season 6, Episode 08 - The Disappeared Pt. 1",
+        category: "SciFi"
+    },
+    {
+        quote: "Wisdom is born in fools as well as wise men.",
+        source: "The Clone Wars - Season 6, Episode 09 - The Disappeared Pt. 2",
+        category: "SciFi"
+    },
+    {
+        quote: "What is lost is often found.",
+        source: "The Clone Wars - Season 6, Episode 10 - The Lost One",
+        category: "SciFi"
+    },
+    {
+        quote: "Madness can sometimes be the path to truth.",
+        source: "The Clone Wars - Season 6, Episode 11 - Voices",
+        category: "SciFi"
+    },
+    {
+        quote: "Death is just the beginning.",
+        source: "The Clone Wars - Season 6, Episode 12 - Destiny",
+        category: "SciFi"
+    },
+    {
+        quote: "Facing all that you fear will free you from yourself.",
+        source: "The Clone Wars - Season 6, Episode 13 - Sacrifice",
+        category: "SciFi"
+    },
+    {
+        quote: "Embrace others for their differences, for that makes you whole.",
+        source: "The Clone Wars - Season 7, Episode 01 - The Bad Batch",
+        category: "SciFi"
+    },
+    {
+        quote: "The search for truth begins with belief.",
+        source: "The Clone Wars - Season 7, Episode 02 - A Distant Echo",
+        category: "SciFi"
+    },
+    {
+        quote: "Trust placed in another is trust earned.",
+        source: "The Clone Wars - Season 7, Episode 04 - Unfinished Business",
+        category: "SciFi"
+    },
+    {
+        quote: "Mistakes are valuable lessons often learned too late.",
+        source: "The Clone Wars - Season 7, Episode 06 - Deal No Deal",
+        category: "SciFi"
+    },
+    {
+        quote: "Who you were does not have to define who you are.",
+        source: "The Clone Wars - Season 7, Episode 07 - Dangerous Debt",
+        category: "SciFi"
+    },
+    {
+        quote: "You can change who you are, but you cannot run from yourself.",
+        source: "The Clone Wars - Season 7, Episode 08 - Together Again",
+        category: "SciFi"
+    },
+    {
+        quote: "The wise will inherit honor, but fools get disgrace.",
+        source: "Proverbs 3:35",
+        category: "Scripture"
+    },
+    {
+        quote: "The beginning of wisdom is this: Get wisdom, and whatever you get, get insight.",
+        source: "Proverbs 4:7",
+        category: "Scripture"
+    },
+    {
+        quote: "Whoever walks with the wise becomes wise, but the companion of fools will suffer harm.",
+        source: "Proverbs 13:20",
+        category: "Scripture"
+    },
+    {
+        quote: "How much better to get wisdom than gold! To get understanding is to be chosen rather than silver.",
+        source: "Proverbs 16:16",
+        category: "Scripture"
+    },
+    {
+        quote: "Where there is no guidance, a people falls, but in an abundance of counselors there is safety.",
+        source: "Proverbs 11:14",
+        category: "Scripture"
+    },
+    {
+        quote: "The way of a fool is right in his own eyes, but a wise man listens to advice.",
+        source: "Proverbs 12:15",
+        category: "Scripture"
+    },
+    {
+        quote: "Without counsel plans fail, but with many advisers they succeed.",
+        source: "Proverbs 15:22",
+        category: "Scripture"
+    },
+    {
+        quote: "Listen to advice and accept instruction, that you may gain wisdom in the future.",
+        source: "Proverbs 19:20",
+        category: "Scripture"
+    },
+    {
+        quote: "The purpose in a man’s heart is like deep water, but a man of understanding will draw it out.",
+        source: "Proverbs 20:5",
+        category: "Scripture"
+    },
+    {
+        quote: "Doing wrong is like a joke to a fool, but wisdom is pleasure to a man of understanding.",
+        source: "Proverbs 10:23",
+        category: "Scripture"
+    },
+    {
+        quote: "The vexation of a fool is known at once, but the prudent ignores an insult.",
+        source: "Proverbs 12:16",
+        category: "Scripture"
+    },
+    {
+        quote: "The discerning sets his face toward wisdom, but the eyes of a fool are on the ends of the earth.",
+        source: "Proverbs 17:24",
+        category: "Scripture"
+    },
+    {
+        quote: "A fool takes no pleasure in understanding, but only in expressing his opinion.",
+        source: "Proverbs 18:2",
+        category: "Scripture"
+    },
+    {
+        quote: "A stone is heavy, and sand is weighty, but a fool’s provocation is heavier than both.",
+        source: "Proverbs 27:3",
+        category: "Scripture"
+    },
+    {
+        quote: "If a wise man has an argument with a fool, the fool only rages and laughs, and there is no quiet.",
+        source: "Proverbs 29:9",
+        category: "Scripture"
+    },
+    {
+        quote: "Treasures gained by wickedness do not profit, but righteousness delivers from death.",
+        source: "Proverbs 10:2",
+        category: "Scripture"
+    },
+    {
+        quote: "The wage of the righteous leads to life, the gain of the wicked to sin.",
+        source: "Proverbs 10:16",
+        category: "Scripture"
+    },
+    {
+        quote: "The wicked are overthrown and are no more, but the house of the righteous will stand.",
+        source: "Proverbs 12:7",
+        category: "Scripture"
+    },
+    {
+        quote: "The house of the wicked will be destroyed, but the tent of the upright will flourish.",
+        source: "Proverbs 14:11",
+        category: "Scripture"
+    },
+    {
+        quote: "When the righteous increase, the people rejoice, but when the wicked rule, the people groan.",
+        source: "Proverbs 29:2",
+        category: "Scripture"
+    },
+    {
+        quote: "The way of the wicked is like deep darkness; they do not know over what they stumble.",
+        source: "Proverbs 4:19",
+        category: "Scripture"
+    },
+    {
+        quote: "The wicked accepts a bribe in secret to pervert the ways of justice.",
+        source: "Proverbs 17:23",
+        category: "Scripture"
+    },
+    {
+        quote: "When wickedness comes, contempt comes also, and with dishonor comes disgrace.",
+        source: "Proverbs 18:3",
+        category: "Scripture"
+    },
+    {
+        quote: "A wicked man puts on a bold face, but the upright gives thought to his ways.",
+        source: "Proverbs 21:29",
+        category: "Scripture"
+    },
+    {
+        quote: "Fret not yourself because of evildoers, and be not envious of the wicked, for the evil man has no future; the lamp of the wicked will be put out.",
+        source: "Proverbs 24:19-20",
+        category: "Scripture"
+    },
+    {
+        quote: "Give instruction to a wise man, and he will be still wiser; teach a righteous man, and he will increase in learning.",
+        source: "Proverbs 9:9",
+        category: "Scripture"
+    },
+    {
+        quote: "Better is a poor person who walks in his integrity than one who is crooked in speech and is a fool.",
+        source: "Proverbs 19:1",
+        category: "Scripture"
+    },
+    {
+        quote: "Whoever speaks the truth gives honest evidence, but a false witness utters deceit.",
+        source: "Proverbs 12:17",
+        category: "Scripture"
+    },
+    {
+        quote: "Truthful lips endure forever, but a lying tongue is but for a moment.",
+        source: "Proverbs 12:19",
+        category: "Scripture"
+    },
+    {
+        quote: "From the fruit of his mouth a man eats what is good, but the desire of the treacherous is for violence.",
+        source: "Proverbs 13:2",
+        category: "Scripture"
+    },
+    {
+        quote: "Buy truth, and do not sell it; buy wisdom, instruction, and understanding.",
+        source: "Proverbs 23:23",
+        category: "Scripture"
+    },
+    {
+        quote: "A worthless witness mocks at justice, and the mouth of the wicked devours iniquity.",
+        source: "Proverbs 19:28",
+        category: "Scripture"
+    },
+    {
+        quote: "Bread gained by deceit is sweet to a man, but afterward his mouth will be full of gravel.",
+        source: "Proverbs 20:17",
+        category: "Scripture"
+    },
+    {
+        quote: "The getting of treasures by a lying tongue is a fleeting vapor and a snare of death.",
+        source: "Proverbs 21:6",
+        category: "Scripture"
+    },
+    {
+        quote: "Be not a witness against your neighbor without cause, and do not deceive with your lips.",
+        source: "Proverbs 24:28",
+        category: "Scripture"
+    },
+    {
+        quote: "A scoffer does not like to be reproved; he will not go to the wise.",
+        source: "Proverbs 15:12",
+        category: "Scripture"
+    },
+    {
+        quote: "Drive out a scoffer, and strife will go out, and quarreling and abuse will cease.",
+        source: "Proverbs 22:10",
+        category: "Scripture"
+    },
+    {
+        quote: "A dishonest man spreads strife, and a whisperer separates close friends.",
+        source: "Proverbs 16:28",
+        category: "Scripture"
+    },
+    {
+        quote: "The words of a whisperer are like delicious morsels; they go down into the inner parts of the body.",
+        source: "Proverbs 18:8",
+        category: "Scripture"
+    },
+    {
+        quote: "For lack of wood the fire goes out, and where there is no whisperer, quarreling ceases.",
+        source: "Proverbs 26:20",
+        category: "Scripture"
+    },
+    {
+        quote: "Do not contend with a man for no reason, when he has done you no harm.",
+        source: "Proverbs 3:30",
+        category: "Scripture"
+    },
+    {
+        quote: "A soft answer turns away wrath, but a harsh word stirs up anger.",
+        source: "Proverbs 15:1",
+        category: "Scripture"
+    },
+    {
+        quote: "Answer not a fool according to his folly, lest you be like him yourself.",
+        source: "Proverbs 26:4",
+        category: "Scripture"
+    },
+    {
+        quote: "Whoever meddles in a quarrel not his own is like one who takes a passing dog by the ears.",
+        source: "Proverbs 26:17",
+        category: "Scripture"
+    },
+    {
+        quote: "A lying tongue hates its victims, and a flattering mouth works ruin.",
+        source: "Proverbs 26:28",
+        category: "Scripture"
+    },
+    {
+        quote: "The crucible is for silver, and the furnace is for gold, and a man is tested by his praise.",
+        source: "Proverbs 27:21",
+        category: "Scripture"
+    },
+    {
+        quote: "Whoever rebukes a man will afterward find more favor than he who flatters with his tongue.",
+        source: "Proverbs 28:23",
+        category: "Scripture"
+    },
+    {
+        quote: "Like clouds and wind without rain is a man who boasts of a gift he does not give.",
+        source: "Proverbs 25:14",
+        category: "Scripture"
+    },
+    {
+        quote: "Whoever goes about slandering reveals secrets, but he who is trustworthy in spirit keeps a thing covered.",
+        source: "Proverbs 11:13",
+        category: "Scripture"
+    },
+    {
+        quote: "Whoever goes about slandering reveals secrets; therefore do not associate with a simple babbler.",
+        source: "Proverbs 20:19",
+        category: "Scripture"
+    },
+    {
+        quote: "Poverty and disgrace come to him who ignores instruction, but whoever heeds reproof is honored.",
+        source: "Proverbs 13:18",
+        category: "Scripture"
+    },
+    {
+        quote: "A rebuke goes deeper into a man of understanding than a hundred blows into a fool.",
+        source: "Proverbs 17:10",
+        category: "Scripture"
+    },
+    {
+        quote: "Like a gold ring or an ornament of gold is a wise reprover to a listening ear.",
+        source: "Proverbs 25:12",
+        category: "Scripture"
+    },
+    {
+        quote: "Anxiety in a man’s heart weighs him down, but a good word makes him glad.",
+        source: "Proverbs 12:25",
+        category: "Scripture"
+    },
+    {
+        quote: "A friend loves at all times, and a brother is born for adversity.",
+        source: "Proverbs 17:17",
+        category: "Scripture"
+    },
+    {
+        quote: "A brother offended is more unyielding than a strong city, and quarreling is like the bars of a castle.",
+        source: "Proverbs 18:19",
+        category: "Scripture"
+    },
+    {
+        quote: "Iron sharpens iron, and one man sharpens another.",
+        source: "Proverbs 27:17",
+        category: "Scripture"
+    },
+    {
+        quote: "The soul of the wicked desires evil; his neighbor finds no mercy in his eyes.",
+        source: "Proverbs 21:10",
+        category: "Scripture"
+    },
+    {
+        quote: "Whoever blesses his neighbor with a loud voice, rising early in the morning, will be counted as cursing.",
+        source: "Proverbs 27:14",
+        category: "Scripture"
+    },
+    {
+        quote: "Do not envy a man of violence and do not choose any of his ways.",
+        source: "Proverbs 3:31",
+        category: "Scripture"
+    },
+    {
+        quote: "Do not enter the path of the wicked, and do not walk in the way of the evil. Avoid it; do not go on it; turn away from it and pass on.",
+        source: "Proverbs 4:14-15",
+        category: "Scripture"
+    },
+    {
+        quote: "A man of violence entices his neighbor and leads him in a way that is not good.",
+        source: "Proverbs 16:29",
+        category: "Scripture"
+    },
+    {
+        quote: "Faithful are the wounds of a friend; profuse are the kisses of an enemy.",
+        source: "Proverbs 27:6",
+        category: "Scripture"
+    },
+    {
+        quote: "When a land transgresses, it has many rulers, but with a man of understanding and knowledge, its stability will long continue.",
+        source: "Proverbs 28:2",
+        category: "Scripture"
+    },
+    {
+        quote: "Wine is a mocker, strong drink a brawler, and whoever is led astray by it is not wise.",
+        source: "Proverbs 20:1",
+        category: "Scripture"
+    },
+    {
+        quote: "The drunkard and the glutton will come to poverty, and slumber will clothe them with rags.",
+        source: "Proverbs 23:21",
+        category: "Scripture"
+    },
+    {
+        quote: "A worthless man plots evil, and his speech is like a scorching fire.",
+        source: "Proverbs 16:27",
+        category: "Scripture"
+    },
+    {
+        quote: "Whoever is slow to anger has great understanding, but he who has a hasty temper exalts folly.",
+        source: "Proverbs 14:29",
+        category: "Scripture"
+    },
+    {
+        quote: "A hot-tempered man stirs up strife, but he who is slow to anger quiets contention.",
+        source: "Proverbs 15:18",
+        category: "Scripture"
+    },
+    {
+        quote: "A man of wrath stirs up strife, and one given to anger causes much transgression.",
+        source: "Proverbs 29:22",
+        category: "Scripture"
+    },
+    {
+        quote: "For jealousy makes a man furious, and he will not spare when he takes revenge.",
+        source: "Proverbs 6:34",
+        category: "Scripture"
+    },
+    {
+        quote: "Do not say, 'I will do to him as he has done to me; I will pay the man back for what he has done.'",
+        source: "Proverbs 24:29",
+        category: "Scripture"
+    },
+    {
+        quote: "Let your eyes look directly forward, and your gaze be straight before you. Ponder the path of your feet; then all your ways will be sure.",
+        source: "Proverbs 4:25-26",
+        category: "Scripture"
+    },
+    {
+        quote: "Every prudent man acts with knowledge, but a fool flaunts his folly.",
+        source: "Proverbs 13:16",
+        category: "Scripture"
+    },
+    {
+        quote: "The prudent sees danger and hides himself, but the simple go on and suffer for it.",
+        source: "Proverbs 22:3",
+        category: "Scripture"
+    },
+    {
+        quote: "The prudent sees danger and hides himself, but the simple go on and suffer for it.",
+        source: "Proverbs 27:12",
+        category: "Scripture"
+    },
+    {
+        quote: "It is not good to eat much honey, nor is it glorious to seek one’s own glory.",
+        source: "Proverbs 25:27",
+        category: "Scripture"
+    },
+    {
+        quote: "Rescue those who are being taken away to death; hold back those who are stumbling to the slaughter.",
+        source: "Proverbs 24:11",
+        category: "Scripture"
+    },
+    {
+        quote: "Open your mouth for the mute, for the rights of all who are destitute. Open your mouth, judge righteously, defend the rights of the poor and needy.",
+        source: "Proverbs 31:8-9",
+        category: "Scripture"
+    },
+    {
+        quote: "Whoever conceals his transgressions will not prosper, but he who confesses and forsakes them will obtain mercy.",
+        source: "Proverbs 28:13",
+        category: "Scripture"
+    },
+    {
+        quote: "He who is often reproved, yet stiffens his neck, will suddenly be broken beyond healing.",
+        source: "Proverbs 29:1",
+        category: "Scripture"
+    },
+    {
+        quote: "Hatred stirs up strife, but love covers all offenses.",
+        source: "Proverbs 10:12",
+        category: "Scripture"
+    },
+    {
+        quote: "A man who is kind benefits himself, but a cruel man hurts himself.",
+        source: "Proverbs 11:17",
+        category: "Scripture"
+    },
+    {
+        quote: "Whoever pursues righteousness and kindness will find life, righteousness, and honor.",
+        source: "Proverbs 21:21",
+        category: "Scripture"
+    },
+    {
+        quote: "A glad heart makes a cheerful face, but by sorrow of heart the spirit is crushed.",
+        source: "Proverbs 15:13",
+        category: "Scripture"
+    },
+    {
+        quote: "When justice is done, it is a joy to the righteous but terror to evildoers.",
+        source: "Proverbs 21:15",
+        category: "Scripture"
+    },
+    {
+        quote: "Deceit is in the heart of those who devise evil, but those who plan peace have joy.",
+        source: "Proverbs 12:20",
+        category: "Scripture"
+    },
+    {
+        quote: "Desire without knowledge is not good, and whoever makes haste with his feet misses his way.",
+        source: "Proverbs 19:2",
+        category: "Scripture"
+    },
+    {
+        quote: "Good sense makes one slow to anger, and it is his glory to overlook an offense.",
+        source: "Proverbs 19:11",
+        category: "Scripture"
+    },
+    {
+        quote: "With patience a ruler may be persuaded, and a soft tongue will break a bone.",
+        source: "Proverbs 25:15",
+        category: "Scripture"
+    },
+    {
+        quote: "Above all else, guard your heart, for everything you do flows from it.",
+        source: "Proverbs 4:23",
+        category: "Scripture"
+    },
+    {
+        quote: "Whoever diligently seeks good seeks favor, but evil comes to him who searches for it.",
+        source: "Proverbs 11:27",
+        category: "Scripture"
+    },
+    {
+        quote: "Whoever restrains his words has knowledge, and he who has a cool spirit is a man of understanding.",
+        source: "Proverbs 17:27",
+        category: "Scripture"
+    },
+    {
+        quote: "Whoever guards his mouth preserves his life; he who opens wide his lips comes to ruin.",
+        source: "Proverbs 13:3",
+        category: "Scripture"
+    },
+    {
+        quote: "Whoever is slow to anger is better than the mighty, and he who rules his spirit than he who takes a city.",
+        source: "Proverbs 16:32",
+        category: "Scripture"
+    },
+    {
+        quote: "When pride comes, then comes disgrace, but with humility comes wisdom.",
+        source: "Proverbs 11:2",
+        category: "Scripture"
+    },
+    {
+        quote: "Pride goes before destruction, and a haughty spirit before a fall.",
+        source: "Proverbs 16:18",
+        category: "Scripture"
+    },
+    {
+        quote: "Before destruction a man’s heart is haughty, but humility comes before honor.",
+        source: "Proverbs 18:12",
+        category: "Scripture"
+    },
+    {
+        quote: "Bread gained by deceit is sweet to a man, but afterward his mouth will be full of gravel.",
+        source: "Proverbs 20:17",
+        category: "Scripture"
+    },
+    {
+        quote: "Better is a poor man who walks in his integrity than a rich man who is crooked in his ways.",
+        source: "Proverbs 28:6",
+        category: "Scripture"
+    },
+    {
+        quote: "Such are the ways of everyone who is greedy for unjust gain; it takes away the life of its possessors.",
+        source: "Proverbs 1:19",
+        category: "Scripture"
+    },
+    {
+        quote: "Wealth gained hastily will dwindle, but whoever gathers little by little will increase it.",
+        source: "Proverbs 13:11",
+        category: "Scripture"
+    },
+    {
+        quote: "In all toil there is profit, but mere talk tends only to poverty.",
+        source: "Proverbs 14:23",
+        category: "Scripture"
+    },
+    {
+        quote: "The plans of the diligent lead surely to abundance, but everyone who is hasty comes only to poverty.",
+        source: "Proverbs 21:5",
+        category: "Scripture"
+    },
+    {
+        quote: "Whoever has a bountiful eye will be blessed, for he shares his bread with the poor.",
+        source: "Proverbs 22:9",
+        category: "Scripture"
+    },
+    {
+        quote: "Stay away from a fool, for you will not find knowledge on their lips.",
+        source: "Proverbs 14:7",
+        category: "Scripture"
+    },
+    {
+        quote: "There is a way that appears to be right, but in the end it leads to death.",
+        source: "Proverbs 14:12",
+        category: "Scripture"
+    },
+    {
+        quote: "Even in laughter the heart may ache, and rejoicing may end in grief.",
+        source: "Proverbs 14:13",
+        category: "Scripture"
+    },
+    {
+        quote: "The simple believes everything, but the prudent gives thought to his steps.",
+        source: "Proverbs 14:15",
+        category: "Scripture"
+    }
+
+];
+
+/* ==================================================
+   QUIZ VARIABLES
+   ================================================== */
+
+let selectedQuotes = [];
+let currentQuestion = 0;
+let correctAnswers = 0;
+
+/* ==================================================
+   START BUTTON
+   ================================================== */
+
+document
+.getElementById("startBtn")
+.addEventListener("click", startQuiz);
+
+/* ==================================================
+   SHUFFLE FUNCTION
+   ================================================== */
+
+function shuffle(array) {
+
+    for (let i = array.length - 1; i > 0; i--) {
+
+        const j = Math.floor(Math.random() * (i + 1));
+
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+
+    return array;
+}
+
+/* ==================================================
+   START QUIZ
+   ================================================== */
+
+function startQuiz() {
+
+    const errorBox = document.getElementById("homeError");
+    errorBox.textContent = "";
+
+    if (allQuotes.length < 10) {
+
+        errorBox.textContent =
+            `At least 10 quotes are required. Current quotes: ${allQuotes.length}`;
+
+        return;
+    }
+
+    selectedQuotes =
+        shuffle([...allQuotes]).slice(0, 10);
+
+    currentQuestion = 0;
+    correctAnswers = 0;
+
+    document
+        .getElementById("homePage")
+        .classList.add("hidden");
+
+    document
+        .getElementById("resultsPage")
+        .classList.add("hidden");
+
+    document
+        .getElementById("quizPage")
+        .classList.remove("hidden");
+
+    loadQuestion();
+}
+
+/* ==================================================
+   LOAD QUESTION
+   ================================================== */
+
+function loadQuestion() {
+
+    const question = selectedQuotes[currentQuestion];
+
+    document.getElementById("questionCounter").textContent =
+        `Question ${currentQuestion + 1} of 10`;
+
+    document.getElementById("quoteText").textContent =
+        `"${question.quote}"`;
+
+    document.getElementById("answerResult").textContent = "";
+    document.getElementById("sourceText").textContent = "";
+
+    document.getElementById("answerButtons").style.display =
+        "block";
+
+    document.getElementById("nextBtn").classList.add("hidden");
+}
+
+/* ==================================================
+   ANSWER QUESTION
+   ================================================== */
+
+function answerQuestion(choice) {
+
+    const question = selectedQuotes[currentQuestion];
+
+    const result =
+        document.getElementById("answerResult");
+
+    if (choice === question.category) {
+
+        correctAnswers++;
+
+        result.textContent = "CORRECT";
+        result.className = "result correct";
+
+    } else {
+
+        result.textContent = "INCORRECT";
+        result.className = "result incorrect";
+    }
+
+    document.getElementById("sourceText").textContent =
+        `Source: ${question.source}`;
+
+    document.getElementById("answerButtons").style.display =
+        "none";
+
+    const nextBtn =
+        document.getElementById("nextBtn");
+
+    nextBtn.classList.remove("hidden");
+
+    if (currentQuestion === 9) {
+        nextBtn.textContent = "See Results";
+    } else {
+        nextBtn.textContent = "Next Question";
+    }
+}
+
+/* ==================================================
+   NEXT QUESTION
+   ================================================== */
+
+function nextQuestion() {
+
+    currentQuestion++;
+
+    if (currentQuestion >= 10) {
+
+        showResults();
+        return;
+    }
+
+    loadQuestion();
+}
+
+/* ==================================================
+   RESULTS PAGE
+   ================================================== */
+
+function showResults() {
+
+    document
+        .getElementById("quizPage")
+        .classList.add("hidden");
+
+    document
+        .getElementById("resultsPage")
+        .classList.remove("hidden");
+
+    const percentage =
+        Math.round((correctAnswers / 10) * 100);
+
+    document.getElementById("scoreText").innerHTML = `
+        Correct Answers: ${correctAnswers} / 10
+        <br><br>
+        Percentage: ${percentage}%
+    `;
+}
+
+/* ==================================================
+   RETURN HOME
+   ================================================== */
+
+function goHome() {
+
+    document
+        .getElementById("resultsPage")
+        .classList.add("hidden");
+
+    document
+        .getElementById("homePage")
+        .classList.remove("hidden");
+}
+
+</script>
+
+</body>
+</html>
