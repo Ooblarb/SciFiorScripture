@@ -8,22 +8,61 @@
 <style>
 body {
     font-family: Arial, sans-serif;
-    background-color: #111;
     color: white;
     margin: 0;
     padding: 0;
     text-align: center;
+    min-height: 100vh;
+    overflow-x: hidden;
+
+    background-color: #000;
+
+    background-image:
+        radial-gradient(2px 2px at 20px 30px, white, transparent),
+        radial-gradient(2px 2px at 100px 80px, white, transparent),
+        radial-gradient(1px 1px at 150px 40px, white, transparent),
+        radial-gradient(2px 2px at 200px 120px, white, transparent),
+        radial-gradient(1px 1px at 250px 60px, white, transparent),
+        radial-gradient(2px 2px at 320px 140px, white, transparent),
+        radial-gradient(1px 1px at 380px 30px, white, transparent);
+
+    background-repeat: repeat;
+    background-size: 400px 250px;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+
+    background-image:
+        radial-gradient(1px 1px at 50px 100px, white, transparent),
+        radial-gradient(2px 2px at 150px 200px, white, transparent),
+        radial-gradient(1px 1px at 250px 50px, white, transparent),
+        radial-gradient(2px 2px at 350px 150px, white, transparent),
+        radial-gradient(1px 1px at 450px 100px, white, transparent);
+
+    background-size: 500px 300px;
+
+    animation: twinkle 4s ease-in-out infinite alternate;
+
+    pointer-events: none;
+    z-index: -1;
+}
+
+@keyframes twinkle {
+    from {
+        opacity: 0.4;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 .container {
     max-width: 900px;
     margin: auto;
     padding: 40px 20px;
-}
-
-h1 {
-    font-size: 3rem;
-    margin-bottom: 20px;
 }
 
 .quote {
